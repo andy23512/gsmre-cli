@@ -6,8 +6,11 @@ import fs from 'fs';
   const projectName = getProjectName();
   makeAndChangeDirectory(projectName);
   const packageManager = await getPackageManager();
+  await initPackageJson(packageManager);
+  addScripts();
   await installDevDependencies(packageManager);
   await initTsConfig(packageManager);
+  setTsConfig();
 })().catch(console.error);
 
 function getProjectName() {
@@ -35,6 +38,10 @@ function getPackageManager(): Promise<'yarn' | 'npm'> {
     .catch(() => 'npm' as 'npm');
 }
 
+function initPackageJson(packageManager: 'yarn' | 'npm') {
+  return promiseSpawn(packageManager, ['init', '-y']);
+}
+
 function installDevDependencies(packageManager: 'yarn' | 'npm') {
   const installDevDepsArgs =
     packageManager === 'yarn' ? ['add', '-D'] : ['install', '-D'];
@@ -44,6 +51,22 @@ function installDevDependencies(packageManager: 'yarn' | 'npm') {
 
 function initTsConfig(packageManager: 'yarn' | 'npm') {
   return promiseSpawn('./node_modules/.bin/tsc', ['--init']);
+}
+
+function addScripts() {
+  const pkg = JSON.parse(fs.readFileSync('./package.json').toString());
+  pkg['scripts'] = {
+    start: 'ts-node src/index.ts',
+    build: 'tsc'
+  };
+  fs.writeFileSync('./package.json', JSON.stringify(pkg, null, 2));
+}
+
+function setTsConfig() {
+  let config = fs.readFileSync('./tsconfig.json', { encoding: 'utf-8' });
+  config = config.replace('// "outDir": "./",', '"outDir": "dist",');
+  config = config.replace('"target": "es5",', '"target": "es6",');
+  fs.writeFileSync('./tsconfig.json', config);
 }
 
 function promiseSpawn(command: string, args: string[]) {

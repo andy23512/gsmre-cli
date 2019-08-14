@@ -18,8 +18,11 @@ const fs_1 = __importDefault(require("fs"));
     const projectName = getProjectName();
     makeAndChangeDirectory(projectName);
     const packageManager = yield getPackageManager();
+    yield initPackageJson(packageManager);
+    addScripts();
     yield installDevDependencies(packageManager);
     yield initTsConfig(packageManager);
+    setTsConfig();
 }))().catch(console.error);
 function getProjectName() {
     const projectName = process.argv[2];
@@ -40,6 +43,9 @@ function getPackageManager() {
         .then(() => 'yarn')
         .catch(() => 'npm');
 }
+function initPackageJson(packageManager) {
+    return promiseSpawn(packageManager, ['init', '-y']);
+}
 function installDevDependencies(packageManager) {
     const installDevDepsArgs = packageManager === 'yarn' ? ['add', '-D'] : ['install', '-D'];
     const devDeps = ['@types/node', 'ts-node', 'tslint', 'typescript'];
@@ -47,6 +53,20 @@ function installDevDependencies(packageManager) {
 }
 function initTsConfig(packageManager) {
     return promiseSpawn('./node_modules/.bin/tsc', ['--init']);
+}
+function addScripts() {
+    const pkg = JSON.parse(fs_1.default.readFileSync('./package.json').toString());
+    pkg['scripts'] = {
+        start: 'ts-node src/index.ts',
+        build: 'tsc'
+    };
+    fs_1.default.writeFileSync('./package.json', JSON.stringify(pkg, null, 2));
+}
+function setTsConfig() {
+    let config = fs_1.default.readFileSync('./tsconfig.json', { encoding: 'utf-8' });
+    config = config.replace('// "outDir": "./",', '"outDir": "dist",');
+    config = config.replace('"target": "es5",', '"target": "es6",');
+    fs_1.default.writeFileSync('./tsconfig.json', config);
 }
 function promiseSpawn(command, args) {
     return new Promise((resolve, reject) => {
