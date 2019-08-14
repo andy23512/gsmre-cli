@@ -21,10 +21,14 @@
     "precommit-build"
   ],
   "devDependencies": {
+    "@types/command-exists": "^1.2.0",
     "@types/node": "^12.7.1",
     "precommit-hook": "^3.0.0",
     "ts-node": "^8.3.0",
     "tslint": "^5.18.0",
     "typescript": "^3.5.3"
+  },
+  "dependencies": {
+    "command-exists": "^1.2.8"
   }
 }
