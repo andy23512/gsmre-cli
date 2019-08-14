@@ -2,6 +2,8 @@ import child_process from 'child_process';
 import commandExists from 'command-exists';
 import fs from 'fs';
 
+type PackageManager = 'yarn' | 'npm';
+
 (async () => {
   const projectName = getProjectName();
   makeAndChangeDirectory(projectName);
@@ -11,6 +13,7 @@ import fs from 'fs';
   await installDevDependencies(packageManager);
   await initTsConfig(packageManager);
   setTsConfig();
+  addSampleTsFile();
 })().catch(console.error);
 
 function getProjectName() {
@@ -32,24 +35,24 @@ function makeAndChangeDirectory(projectName: string) {
   process.chdir(projectName);
 }
 
-function getPackageManager(): Promise<'yarn' | 'npm'> {
+function getPackageManager(): Promise<PackageManager> {
   return commandExists('yarn')
     .then(() => 'yarn' as 'yarn')
     .catch(() => 'npm' as 'npm');
 }
 
-function initPackageJson(packageManager: 'yarn' | 'npm') {
+function initPackageJson(packageManager: PackageManager) {
   return promiseSpawn(packageManager, ['init', '-y']);
 }
 
-function installDevDependencies(packageManager: 'yarn' | 'npm') {
+function installDevDependencies(packageManager: PackageManager) {
   const installDevDepsArgs =
     packageManager === 'yarn' ? ['add', '-D'] : ['install', '-D'];
   const devDeps = ['@types/node', 'ts-node', 'tslint', 'typescript'];
   return promiseSpawn(packageManager, [...installDevDepsArgs, ...devDeps]);
 }
 
-function initTsConfig(packageManager: 'yarn' | 'npm') {
+function initTsConfig(packageManager: PackageManager) {
   return promiseSpawn('./node_modules/.bin/tsc', ['--init']);
 }
 
@@ -67,6 +70,11 @@ function setTsConfig() {
   config = config.replace('// "outDir": "./",', '"outDir": "dist",');
   config = config.replace('"target": "es5",', '"target": "es6",');
   fs.writeFileSync('./tsconfig.json', config);
+}
+
+function addSampleTsFile() {
+  fs.mkdirSync('src');
+  fs.writeFileSync('./src/index.ts', "console.log('nanoha')");
 }
 
 function promiseSpawn(command: string, args: string[]) {

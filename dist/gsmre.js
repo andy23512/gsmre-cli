@@ -23,6 +23,7 @@ const fs_1 = __importDefault(require("fs"));
     yield installDevDependencies(packageManager);
     yield initTsConfig(packageManager);
     setTsConfig();
+    addSampleTsFile();
 }))().catch(console.error);
 function getProjectName() {
     const projectName = process.argv[2];
@@ -67,6 +68,10 @@ function setTsConfig() {
     config = config.replace('// "outDir": "./",', '"outDir": "dist",');
     config = config.replace('"target": "es5",', '"target": "es6",');
     fs_1.default.writeFileSync('./tsconfig.json', config);
+}
+function addSampleTsFile() {
+    fs_1.default.mkdirSync('src');
+    fs_1.default.writeFileSync('./src/index.ts', "console.log('nanoha')");
 }
 function promiseSpawn(command, args) {
     return new Promise((resolve, reject) => {
