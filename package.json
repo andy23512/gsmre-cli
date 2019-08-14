@@ -1,0 +1,30 @@
+{
+  "name": "gsmre-cli",
+  "version": "1.0.0",
+  "main": "main.js",
+  "repository": "git@github.com:andy23512/gsmre-cli.git",
+  "author": "Tangent Chang <andy23512@gmail.com>",
+  "license": "MIT",
+  "bin": {
+    "gsmre": "./main.js"
+  },
+  "scripts": {
+    "start": "ts-node src/gsmre.ts",
+    "build": "tsc",
+    "precommit-build": "tsc && git add dist/"
+  },
+  "files": [
+    "main.js",
+    "dist/gsmre.js"
+  ],
+  "pre-commit": [
+    "precommit-build"
+  ],
+  "devDependencies": {
+    "@types/node": "^12.7.1",
+    "precommit-hook": "^3.0.0",
+    "ts-node": "^8.3.0",
+    "tslint": "^5.18.0",
+    "typescript": "^3.5.3"
+  }
+}
