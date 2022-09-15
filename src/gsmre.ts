@@ -15,6 +15,7 @@ type PackageManager = "yarn" | "npm";
   setTsConfig();
   setEslintConfig();
   addSampleTsFile();
+  await initGitRepo();
 })().catch(console.error);
 
 function getProjectName() {
@@ -102,4 +103,8 @@ function promiseSpawn(command: string, args: string[]) {
       .spawn(command, args, { shell: true, stdio: "inherit" })
       .on("close", (code) => (code === 0 ? resolve(true) : reject()));
   });
+}
+
+function initGitRepo() {
+  return promiseSpawn("git", ["init"]);
 }

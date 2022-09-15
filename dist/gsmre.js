@@ -25,6 +25,7 @@ const fs_1 = __importDefault(require("fs"));
     setTsConfig();
     setEslintConfig();
     addSampleTsFile();
+    yield initGitRepo();
 }))().catch(console.error);
 function getProjectName() {
     const projectName = process.argv[2];
@@ -96,4 +97,7 @@ function promiseSpawn(command, args) {
             .spawn(command, args, { shell: true, stdio: "inherit" })
             .on("close", (code) => (code === 0 ? resolve(true) : reject()));
     });
+}
+function initGitRepo() {
+    return promiseSpawn("git", ["init"]);
 }
