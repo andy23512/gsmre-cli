@@ -11,7 +11,9 @@
   "scripts": {
     "start": "ts-node src/gsmre.ts",
     "build": "tsc",
-    "precommit-build": "tsc && git add dist/"
+    "precommit-build": "tsc && git add dist/",
+    "lint": "jshint .",
+    "validate": "npm ls"
   },
   "files": [
     "main.js",

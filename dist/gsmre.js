@@ -12,15 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const child_process_1 = __importDefault(require("child_process"));
-const command_exists_1 = __importDefault(require("command-exists"));
 const fs_1 = __importDefault(require("fs"));
 (() => __awaiter(this, void 0, void 0, function* () {
     const projectName = getProjectName();
     makeAndChangeDirectory(projectName);
-    const packageManager = yield getPackageManager();
-    yield initPackageJson(packageManager);
+    yield initPackageJson();
     addScripts();
-    yield installDevDependencies(packageManager);
+    yield installDevDependencies();
     yield initTsConfig();
     setTsConfig();
     setEslintConfig();
@@ -41,18 +39,11 @@ function makeAndChangeDirectory(projectName) {
     fs_1.default.mkdirSync(projectName);
     process.chdir(projectName);
 }
-function getPackageManager() {
-    return __awaiter(this, void 0, void 0, function* () {
-        return command_exists_1.default("yarn")
-            .then(() => "yarn")
-            .catch(() => "npm");
-    });
+function initPackageJson() {
+    return promiseSpawn("yarn", ["init", "-y"]);
 }
-function initPackageJson(packageManager) {
-    return promiseSpawn(packageManager, ["init", "-y"]);
-}
-function installDevDependencies(packageManager) {
-    const installDevDepsArgs = packageManager === "yarn" ? ["add", "-D"] : ["install", "-D"];
+function installDevDependencies() {
+    const installDevDepsArgs = ["add", "-D"];
     const devDeps = [
         "@types/node",
         "ts-node",
@@ -60,10 +51,10 @@ function installDevDependencies(packageManager) {
         "@typescript-eslint/eslint-plugin",
         "@typescript-eslint/parser",
     ];
-    return promiseSpawn(packageManager, [...installDevDepsArgs, ...devDeps]);
+    return promiseSpawn("yarn", [...installDevDepsArgs, ...devDeps]);
 }
 function initTsConfig() {
-    return promiseSpawn("./node_modules/.bin/tsc", ["--init"]);
+    return promiseSpawn("yarn", ["tsc", "--init"]);
 }
 function addScripts() {
     const pkg = JSON.parse(fs_1.default.readFileSync("./package.json").toString());

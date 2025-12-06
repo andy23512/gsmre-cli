@@ -1,16 +1,12 @@
 import child_process from "child_process";
-import commandExists from "command-exists";
 import fs from "fs";
-
-type PackageManager = "yarn" | "npm";
 
 (async () => {
   const projectName = getProjectName();
   makeAndChangeDirectory(projectName);
-  const packageManager = await getPackageManager();
-  await initPackageJson(packageManager);
+  await initPackageJson();
   addScripts();
-  await installDevDependencies(packageManager);
+  await installDevDependencies();
   await initTsConfig();
   setTsConfig();
   setEslintConfig();
@@ -37,19 +33,12 @@ function makeAndChangeDirectory(projectName: string) {
   process.chdir(projectName);
 }
 
-async function getPackageManager(): Promise<PackageManager> {
-  return commandExists("yarn")
-    .then(() => "yarn" as const)
-    .catch(() => "npm" as const);
+function initPackageJson() {
+  return promiseSpawn("yarn", ["init", "-y"]);
 }
 
-function initPackageJson(packageManager: PackageManager) {
-  return promiseSpawn(packageManager, ["init", "-y"]);
-}
-
-function installDevDependencies(packageManager: PackageManager) {
-  const installDevDepsArgs =
-    packageManager === "yarn" ? ["add", "-D"] : ["install", "-D"];
+function installDevDependencies() {
+  const installDevDepsArgs = ["add", "-D"];
   const devDeps = [
     "@types/node",
     "ts-node",
@@ -57,11 +46,11 @@ function installDevDependencies(packageManager: PackageManager) {
     "@typescript-eslint/eslint-plugin",
     "@typescript-eslint/parser",
   ];
-  return promiseSpawn(packageManager, [...installDevDepsArgs, ...devDeps]);
+  return promiseSpawn("yarn", [...installDevDepsArgs, ...devDeps]);
 }
 
 function initTsConfig() {
-  return promiseSpawn("./node_modules/.bin/tsc", ["--init"]);
+  return promiseSpawn("yarn", ["tsc", "--init"]);
 }
 
 function addScripts() {
